@@ -1,0 +1,302 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="claude:viewport-fit-sides" content="cover">
+<title>Фармакология, коллоквиум №2</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@600;700&family=Manrope:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: one-column study screen; each tab has its own hue (бирюза = холинергические, коралл = адренергические, фиолет = местные анестетики). Всегда тёмная тема. */
+:root{
+  --ink:#e9f0f2; --muted:#9fb0b7; --surface:#1b2328; --line:rgba(233,240,242,.10);
+  --c-main:#3cc4ae; --c-tint:#0f2421; --c-soft:#17352f;
+  --a-main:#ff8a66; --a-tint:#2a1813; --a-soft:#40231a;
+  --l-main:#b39bff; --l-tint:#1b1730; --l-soft:#2b2450;
+  --on-main:#10181c; color-scheme:dark;
+  --f-display:"Unbounded","Arial Black",system-ui,sans-serif;
+  --f-body:"Manrope",-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{min-height:100%}
+body{margin:0;font-family:var(--f-body);color:var(--ink);background:var(--c-tint);transition:background .3s;-webkit-tap-highlight-color:transparent}
+body[data-tab="a"]{background:var(--a-tint)}
+body[data-tab="l"]{background:var(--l-tint)}
+.app{--main:var(--c-main);--tint:var(--c-tint);--soft:var(--c-soft);
+  max-width:620px;margin:0 auto;display:flex;flex-direction:column;gap:16px;
+  padding-block:20px 28px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.app[data-tab="a"]{--main:var(--a-main);--tint:var(--a-tint);--soft:var(--a-soft)}
+.app[data-tab="l"]{--main:var(--l-main);--tint:var(--l-tint);--soft:var(--l-soft)}
+h1{font-family:var(--f-display);font-weight:700;font-size:20px;line-height:1.25;margin:0;letter-spacing:-.01em;text-wrap:balance}
+h1 span{color:var(--main)}
+
+.tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;background:var(--surface);padding:5px;border-radius:16px}
+.tabs button{font:600 13px/1.2 var(--f-body);border:0;border-radius:12px;padding:11px 4px;background:transparent;color:var(--muted);cursor:pointer;min-width:0;overflow-wrap:anywhere}
+.tabs button[aria-selected="true"]{background:var(--main);color:var(--on-main)}
+
+.chips{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;margin:0 -2px;padding:2px}
+.chips::-webkit-scrollbar{display:none}
+.chips button{flex:none;font:500 13px/1 var(--f-body);border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:9px 13px;border-radius:999px;cursor:pointer}
+.chips button[aria-pressed="true"]{background:var(--soft);border-color:transparent;font-weight:700}
+.chips button.antid{border-color:var(--main);color:var(--main)}
+.chips button.antid[aria-pressed="true"]{background:var(--main);color:var(--on-main)}
+
+.meta{display:flex;justify-content:space-between;align-items:center;gap:12px;font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+.meta label{display:flex;align-items:center;gap:6px;cursor:pointer}
+.meta input{accent-color:var(--main);width:16px;height:16px}
+.bar{height:6px;border-radius:3px;background:var(--surface);overflow:hidden}
+.bar div{height:100%;width:0;background:var(--main);border-radius:3px;transition:width .3s}
+
+.card{background:var(--surface);border-radius:24px;padding:22px 22px 16px;min-height:300px;display:flex;flex-direction:column;gap:16px;cursor:pointer}
+.tag{align-self:flex-start;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--main)}
+.q{font-size:21px;font-weight:700;line-height:1.35;text-wrap:balance}
+.a{display:none;background:var(--tint);border-radius:16px;padding:14px 16px;font-size:16.5px;line-height:1.55;white-space:pre-line}
+.card.open .a{display:block}
+.hint{font-size:13px;color:var(--muted)}
+.card.open .hint{display:none}
+.mark{margin-top:auto;font-size:12.5px;color:var(--muted);text-align:right}
+.mark a{font-weight:700;color:var(--main);text-decoration:none;border-bottom:1px solid currentColor}
+
+.btns{display:flex;gap:10px}
+.btns button{flex:1;font:700 16px/1 var(--f-body);padding:16px;border-radius:16px;cursor:pointer;border:2px solid var(--main)}
+.primary{background:var(--main);color:var(--on-main)}
+.ghost{background:transparent;color:var(--main)}
+button:focus-visible,a:focus-visible{outline:3px solid var(--main);outline-offset:2px}
+
+.done{align-items:flex-start;justify-content:center;cursor:default;gap:10px}
+.done .big{font-family:var(--f-display);font-size:24px}
+.done p{margin:0;color:var(--muted);font-variant-numeric:tabular-nums}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="app" id="app" data-tab="c">
+  <h1>Фармакология, <span>коллоквиум №2</span></h1>
+  <div class="tabs" role="tablist" id="tabs">
+    <button role="tab" id="tab-c" data-tab="c" aria-selected="true">Холинергические</button>
+    <button role="tab" id="tab-a" data-tab="a" aria-selected="false">Адренергические</button>
+    <button role="tab" id="tab-l" data-tab="l" aria-selected="false">Местные анестетики</button>
+  </div>
+  <div class="chips" id="chips"></div>
+  <div class="meta">
+    <span id="ptext"></span>
+    <label><input type="checkbox" id="shuf" checked> Перемешать</label>
+  </div>
+  <div class="bar"><div id="pbar"></div></div>
+  <div class="card" id="card"></div>
+  <div class="btns" id="btns"></div>
+</div>
+
+<script>
+const G={
+  c:{base:"Основы",mm:"Холиномиметики",ahe:"Антихолинэстеразные",mb:"М-холиноблокаторы",gm:"Ганглиоблокаторы и миорелаксанты"},
+  a:{base:"Основы",am:"Адреномиметики",ab:"Адреноблокаторы"},
+  l:{base:"Основы",drugs:"Препараты",tox:"Токсичность"}
+};
+const TABCOLOR={c:"#0f2421",a:"#2a1813",l:"#1b1730"};
+/* [вкладка, подгруппа, вопрос, ответ, 1 = антидот] */
+const D=[
+["c","base","С каким G-белком сопряжены М1, М3, М5-рецепторы?","С Gq → ↑ Ca²⁺ в клетке"],
+["c","base","С каким G-белком сопряжены М2, М4-рецепторы?","С Gi → ↓ цАМФ\nВ сердце (М2) → ↓ ЧСС"],
+["c","base","Н-холинорецепторы: тип и где находятся?","Ионные каналы\nNn — ганглии, надпочечники, ЦНС\nNm — скелетные мышцы"],
+["c","base","Как синтезируется ацетилхолин?","Холин + ацетил-КоА\nФермент — холинацетилтрансфераза"],
+["c","base","Ботулотоксин: механизм","Блокирует выброс ацетилхолина (расщепляет SNARE-белки)"],
+["c","base","Мускариновые симптомы","Миоз, брадикардия, бронхоспазм, слюно- и потоотделение, диарея"],
+
+["c","mm","Пилокарпин","М-холиномиметик\nПоказания: глаукома, сухость во рту"],
+["c","mm","М-холиномиметики: действие на глаз","Миоз, спазм аккомодации, ↓ ВГД"],
+["c","mm","Ацеклидин","М-холиномиметик\nПоказания: глаукома, атония кишечника и мочевого пузыря"],
+["c","mm","Бетанехол","М-холиномиметик\nПоказания: задержка мочи, атония кишечника"],
+["c","mm","Противопоказания М-холиномиметиков","Бронхиальная астма, брадикардия, язвенная болезнь"],
+["c","mm","Цитизин","Н-холиномиметик\nПоказания: отказ от курения"],
+["c","mm","Варениклин","Частичный агонист Н-рецепторов\nПоказания: отказ от курения"],
+["c","mm","Никотин: почему действие двухфазное?","Сначала возбуждает ганглии, затем блокирует их"],
+["c","mm","Отравление мускарином (мухоморы): антидот?","Атропин",1],
+
+["c","ahe","Неостигмин (прозерин): механизм","Обратимый ингибитор ХЭ\nНе проникает в ЦНС"],
+["c","ahe","Неостигмин: показания","Показания: миастения, декураризация, атония кишечника"],
+["c","ahe","Пиридостигмин","Ингибитор ХЭ, действует дольше неостигмина\nПоказания: миастения"],
+["c","ahe","Физостигмин","Ингибитор ХЭ, проникает в ЦНС\nПоказания: отравление атропином (антидот)"],
+["c","ahe","Эдрофоний","Сверхкороткий ингибитор ХЭ\nПоказания: диагностика миастении и типа криза"],
+["c","ahe","Миастенический или холинергический криз?","Миастенический — нехватка препарата\nХолинергический — передозировка ингибиторов ХЭ"],
+["c","ahe","Донепезил, ривастигмин, галантамин","Центральные ингибиторы ХЭ\nПоказания: болезнь Альцгеймера"],
+["c","ahe","Ипидакрин (нейромидин)","Ингибитор ХЭ + блок K⁺-каналов\nПоказания: невриты, полинейропатии"],
+["c","ahe","ФОС: механизм токсичности","Необратимо блокируют холинэстеразу"],
+["c","ahe","Отравление ФОС: клиника","Миоз, бронхорея, брадикардия, фасцикуляции, судороги"],
+["c","ahe","Отравление ФОС: антидоты?","Атропин — снимает М-эффекты\nРеактиваторы ХЭ (пралидоксим, дипироксим) — восстанавливают фермент",1],
+["c","ahe","Реактиваторы ХЭ: когда эффективны?","Только в первые часы, пока ХЭ не «состарилась»",1],
+["c","ahe","Передозировка прозерина: антидот?","Атропин",1],
+
+["c","mb","Атропин: механизм","Неселективный блокатор М-рецепторов\nПроникает в ЦНС"],
+["c","mb","Атропин: показания","Показания: брадикардия, премедикация, отравление ФОС, спазмы ЖКТ"],
+["c","mb","Атропин: действие на глаз","Мидриаз, паралич аккомодации, ↑ ВГД"],
+["c","mb","Отравление атропином: клиника","Сухость, жар, покраснение кожи, тахикардия, мидриаз, возбуждение"],
+["c","mb","Отравление атропином: антидот?","Ингибиторы ХЭ: физостигмин (проникает в ЦНС), галантамин\nПрозерин — только периферические эффекты",1],
+["c","mb","Противопоказания М-холиноблокаторов","Закрытоугольная глаукома, ДГПЖ, тахиаритмии"],
+["c","mb","Скополамин","Сильное центральное действие\nПоказания: профилактика укачивания"],
+["c","mb","Платифиллин","М-холиноблокатор + спазмолитик\nПоказания: спазмы ЖКТ, колики"],
+["c","mb","Гиосцина бутилбромид (бускопан)","Не проникает в ЦНС\nПоказания: спазмы ЖКТ"],
+["c","mb","Ипратропий","Ингаляционный, короткого действия\nПоказания: ХОБЛ, БА"],
+["c","mb","Тиотропий","Ингаляционный, действует 24 ч\nПоказания: ХОБЛ"],
+["c","mb","Тропикамид","Короткий мидриатик\nПоказания: осмотр глазного дна"],
+["c","mb","Солифенацин, оксибутинин","М-холиноблокаторы\nПоказания: гиперактивный мочевой пузырь"],
+["c","mb","Зачем при декураризации к неостигмину добавляют атропин?","Чтобы снять мускариновые эффекты неостигмина (брадикардия, бронхорея)"],
+
+["c","gm","Ганглиоблокаторы: механизм","Блок Nn-рецепторов в вегетативных ганглиях"],
+["c","gm","Ганглиоблокаторы: представители","Азаметоний (пентамин), гексаметоний (бензогексоний)"],
+["c","gm","Ганглиоблокаторы: показания","Показания: гипертонический криз, управляемая гипотония"],
+["c","gm","Ганглиоблокаторы: главный побочный эффект","Ортостатический коллапс"],
+["c","gm","Суксаметоний (дитилин)","Деполяризующий миорелаксант, действует 5–10 мин\nПоказания: интубация, короткие вмешательства"],
+["c","gm","Почему суксаметоний действует коротко?","Быстро разрушается псевдохолинэстеразой плазмы"],
+["c","gm","Суксаметоний: побочные эффекты","Гиперкалиемия, злокачественная гипертермия, мышечные боли"],
+["c","gm","Можно ли снять деполяризующий блок неостигмином?","Нет — блок усилится"],
+["c","gm","Недеполяризующие миорелаксанты","Конкурентный блок Nm\nРокуроний, векуроний, атракурий"],
+["c","gm","Недеполяризующие миорелаксанты: антидоты?","Неостигмин (вместе с атропином)\nСугаммадекс — для рокурония и векурония",1],
+["c","gm","Атракурий, цисатракурий: особенность","Распадаются сами (элиминация Хофмана)\nНе зависят от печени и почек"],
+["c","gm","Злокачественная гипертермия: антидот?","Дантролен",1],
+["c","gm","Ботулизм: специфическое лечение?","Антитоксическая противоботулиническая сыворотка",1],
+["c","gm","Ботулотоксин: показания","Показания: дистонии, спастичность, мигрень, косметология"],
+
+["a","base","С каким G-белком сопряжены α1-рецепторы? Эффекты?","С Gq\nСужение сосудов, мидриаз"],
+["a","base","С каким G-белком сопряжены α2-рецепторы? Эффекты?","С Gi\n↓ выброса НА, ↓ симпатического тонуса"],
+["a","base","С каким G-белком сопряжены β1-рецепторы? Эффекты?","С Gs\n↑ ЧСС и сократимости, ↑ ренина"],
+["a","base","С каким G-белком сопряжены β2-рецепторы? Эффекты?","С Gs\nБронходилатация, расслабление матки, вазодилатация"],
+["a","base","С каким G-белком сопряжены β3-рецепторы? Эффекты?","С Gs\nЛиполиз, расслабление детрузора"],
+["a","base","Как инактивируется норадреналин?","Обратный захват в окончание\nДалее МАО и КОМТ"],
+
+["a","am","Адреналин: рецепторы","Все α и β"],
+["a","am","Адреналин: показания","Показания: анафилактический шок, остановка сердца"],
+["a","am","Адреналин при анафилаксии: путь введения","В/м в переднебоковую поверхность бедра"],
+["a","am","«Извращение» эффекта адреналина","На фоне α-блокаторов адреналин снижает АД"],
+["a","am","Норадреналин","α1 > β1\n↑ АД, рефлекторная брадикардия\nПоказания: септический шок"],
+["a","am","Попадание норадреналина под кожу (некроз): антидот?","Фентоламин местно",1],
+["a","am","Дофамин","Эффект растёт от D1 к β1 и α1 по мере увеличения скорости введения\nПоказания: шок, острая СН"],
+["a","am","Добутамин","β1-агонист\nПоказания: кардиогенный шок, острая СН"],
+["a","am","Фенилэфрин (мезатон)","α1-агонист\nПоказания: гипотензия, ринит, расширение зрачка"],
+["a","am","Ксилометазолин, нафазолин","α-агонисты\nПоказания: ринит\nНе дольше 5–7 дней (риск медикаментозного ринита)"],
+["a","am","Эфедрин","Непрямой + прямой адреномиметик\nБыстро развивается тахифилаксия"],
+["a","am","Клонидин","Центральный α2-агонист\nПоказания: АГ\nОпасен синдром отмены"],
+["a","am","Метилдопа","Центральный α2-агонист\nПоказания: АГ у беременных"],
+["a","am","Моксонидин","Агонист I1-имидазолиновых рецепторов\nПоказания: АГ"],
+["a","am","Сальбутамол","Короткий β2-агонист\nПоказания: купирование бронхоспазма"],
+["a","am","Формотерол, сальметерол","Длительные β2-агонисты (12 ч)\nПоказания: базисная терапия БА и ХОБЛ"],
+["a","am","β2-агонисты: побочные эффекты","Тремор, тахикардия, гипокалиемия"],
+["a","am","ДДБА при астме в монотерапии?","Нельзя — только вместе с ИГКС"],
+["a","am","Гексопреналин (гинипрал)","β2-агонист\nПоказания: угроза преждевременных родов"],
+["a","am","Мирабегрон","β3-агонист\nПоказания: гиперактивный мочевой пузырь"],
+
+["a","ab","Фентоламин","Неселективный α-блокатор\nПоказания: криз при феохромоцитоме"],
+["a","ab","Празозин, доксазозин","α1-блокаторы\nПоказания: АГ, ДГПЖ\nПобочно: «эффект первой дозы»"],
+["a","ab","Тамсулозин","Селективный α1A-блокатор, почти не снижает АД\nПоказания: ДГПЖ"],
+["a","ab","Феохромоцитома: что назначают первым?","Сначала α-, потом β-блокатор"],
+["a","ab","Кардиоселективные β-блокаторы","Бисопролол, метопролол, атенолол, небиволол"],
+["a","ab","Неселективные β-блокаторы","Пропранолол, соталол, тимолол"],
+["a","ab","Небиволол","β1-блокатор + вазодилатация через NO\nПоказания: АГ, ХСН"],
+["a","ab","Карведилол","α1 + β-блокатор\nПоказания: ХСН, АГ"],
+["a","ab","Лабеталол","α1 + β-блокатор\nПоказания: АГ у беременных"],
+["a","ab","Эсмолол","Ультракороткий β1-блокатор, только в/в\nПоказания: тахикардии во время операции"],
+["a","ab","Соталол","β-блокатор + антиаритмик III класса\nПоказания: аритмии\nРиск удлинения QT"],
+["a","ab","Тимолол","β-блокатор в каплях\nПоказания: глаукома"],
+["a","ab","β-блокаторы, снижающие смертность при ХСН","Бисопролол, метопролола сукцинат, карведилол, небиволол"],
+["a","ab","β-блокаторы: противопоказания","БА, АВ-блокада II–III, выраженная брадикардия, кардиогенный шок"],
+["a","ab","Пропранолол вне кардиологии","Показания: тремор, профилактика мигрени, тиреотоксикоз"],
+["a","ab","β-блокаторы при диабете: риск","Маскируют гипогликемию"],
+["a","ab","Резкая отмена β-блокаторов","Синдром рикошета: тахикардия, стенокардия"],
+["a","ab","Передозировка β-блокаторов: антидот?","Глюкагон (повышает цАМФ в обход β-рецепторов)\nТакже атропин при брадикардии",1],
+["a","ab","Резерпин","Истощает запасы НА в окончаниях\nПобочно: депрессия"],
+
+["l","base","Местные анестетики: механизм действия","Блокируют потенциалзависимые Na⁺-каналы изнутри клетки → не возникает потенциал действия"],
+["l","base","В каком порядке выключается чувствительность?","Боль → температура → тактильная → давление\nДвигательная функция — последней"],
+["l","base","Почему МА слабо действуют в воспалённых тканях?","Кислая среда → больше ионизированной формы, она плохо проходит через мембрану"],
+["l","base","На какие группы делят МА по строению?","Эфиры и амиды"],
+["l","base","Как по названию отличить амид от эфира?","В названии амида две буквы «и»: лидокаИн, бупИвакаИн\nВ эфире одна: новокаИн, тетракаИн"],
+["l","base","Где метаболизируются эфиры и амиды?","Эфиры — псевдохолинэстераза плазмы\nАмиды — печень"],
+["l","base","Зачем к МА добавляют адреналин?","Сужает сосуды → дольше действие, меньше токсичность и кровотечение"],
+["l","base","Где нельзя использовать МА с адреналином?","Пальцы, кончик носа, ушная раковина, половой член (риск некроза)"],
+["l","base","Виды местной анестезии","Поверхностная, инфильтрационная, проводниковая, спинномозговая, эпидуральная"],
+
+["l","drugs","Прокаин (новокаин)","Эфир, короткий и слабый\nПоказания: инфильтрационная анестезия\nОслабляет действие сульфаниламидов (метаболит ПАБК)"],
+["l","drugs","Тетракаин (дикаин)","Эфир, сильный и токсичный\nПоказания: поверхностная анестезия (глаз, слизистые)"],
+["l","drugs","Бензокаин (анестезин)","Эфир, плохо растворим в воде\nПоказания: поверхностная анестезия (кожа, слизистые)"],
+["l","drugs","Кокаин: чем отличается от других МА?","Сам сужает сосуды (блокирует обратный захват НА)\nВызывает зависимость"],
+["l","drugs","Лидокаин","Амид, средней длительности, универсальный\nПоказания: все виды анестезии, желудочковые аритмии (класс IB)"],
+["l","drugs","Тримекаин","Амид, близок к лидокаину\nПоказания: инфильтрационная, проводниковая, спинномозговая анестезия"],
+["l","drugs","Артикаин (ультракаин)","Амид, быстрое начало действия\nПоказания: стоматология"],
+["l","drugs","Бупивакаин","Амид, длительный и сильный\nПоказания: спинномозговая и эпидуральная анестезия\nРиск: кардиотоксичность"],
+["l","drugs","Ропивакаин","Амид, длительный, менее кардиотоксичен, чем бупивакаин\nПоказания: эпидуральная анестезия, обезболивание родов"],
+["l","drugs","Прилокаин","Амид\nПобочно: метгемоглобинемия"],
+["l","drugs","Какой МА является антиаритмиком?","Лидокаин (класс IB)\nПоказания: желудочковые аритмии"],
+
+["l","tox","Системная токсичность МА: проявления","ЦНС: онемение языка, металлический вкус, судороги\nСердце: аритмии, брадикардия, остановка"],
+["l","tox","Системная токсичность МА: антидот?","20% липидная эмульсия в/в",1],
+["l","tox","Судороги при токсичности МА: чем купируют?","Бензодиазепины",1],
+["l","tox","Метгемоглобинемия (прилокаин, бензокаин): антидот?","Метиленовый синий",1],
+["l","tox","Аллергия чаще на эфиры или амиды?","На эфиры (из-за ПАБК)"],
+["l","tox","Какой МА самый кардиотоксичный?","Бупивакаин"]
+];
+
+const $=id=>document.getElementById(id);
+const app=$("app"),card=$("card"),btns=$("btns"),chips=$("chips");
+let tab="c",group="all",pool=[],queue=[],known=0,hard=new Set(),open=false;
+
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function esc(s){return s.replace(/&/g,"&amp;").replace(/</g,"&lt;")}
+function list(){return D.map((_,i)=>i).filter(i=>D[i][0]===tab&&(group==="all"||(group==="antid"?D[i][4]===1:D[i][1]===group)))}
+
+function drawChips(){
+  const n=D.filter(d=>d[0]===tab).length, na=D.filter(d=>d[0]===tab&&d[4]===1).length;
+  let h='<button data-g="all" aria-pressed="'+(group==="all")+'">Все · '+n+'</button>';
+  for(const k in G[tab]) h+='<button data-g="'+k+'" aria-pressed="'+(group===k)+'">'+G[tab][k]+'</button>';
+  if(na) h+='<button class="antid" data-g="antid" aria-pressed="'+(group==="antid")+'">Антидоты · '+na+'</button>';
+  chips.innerHTML=h;
+}
+chips.onclick=e=>{const b=e.target.closest("button");if(!b)return;group=b.dataset.g;drawChips();start(list())};
+
+const tg=window.Telegram&&window.Telegram.WebApp&&window.Telegram.WebApp.platform!=="unknown"?window.Telegram.WebApp:null;
+function tgColor(){if(!tg)return;try{tg.setHeaderColor(TABCOLOR[tab]);tg.setBackgroundColor(TABCOLOR[tab])}catch(e){}}
+if(tg){try{tg.ready();tg.expand();if(tg.disableVerticalSwipes)tg.disableVerticalSwipes()}catch(e){}tgColor()}
+
+$("tabs").onclick=e=>{
+  const b=e.target.closest("button");if(!b||b.dataset.tab===tab)return;
+  tab=b.dataset.tab;group="all";
+  document.querySelectorAll("#tabs button").forEach(x=>x.setAttribute("aria-selected",x===b));
+  app.dataset.tab=tab;document.body.dataset.tab=tab;
+  tgColor();drawChips();start(list());
+};
+
+function start(l){pool=l;queue=$("shuf").checked?shuffle([...l]):[...l];known=0;hard=new Set();render()}
+function prog(){const t=pool.length;$("ptext").textContent="Выучено "+known+" из "+t+(hard.size?" · сложных "+hard.size:"");$("pbar").style.width=(t?known/t*100:0)+"%"}
+const MARK='<div class="mark"><a href="https://t.me/sidikoffarhod" target="_blank" rel="noopener">@sidikoffarhod</a> — репетитор по фармакологии</div>';
+
+function render(){
+  prog();open=false;
+  if(!queue.length){
+    card.className="card done";
+    card.innerHTML='<div class="big">Готово</div><p>С первого раза: '+(pool.length-hard.size)+' из '+pool.length+'</p>'+MARK;
+    btns.innerHTML=(hard.size?'<button class="ghost" id="hardonly">Только сложные</button>':'')+'<button class="primary" id="again">Ещё раз</button>';
+    $("again").onclick=()=>start(list());
+    if(hard.size)$("hardonly").onclick=()=>start([...hard]);
+    return;
+  }
+  const d=D[queue[0]];
+  card.className="card";
+  const tag=d[4]===1?G[d[0]][d[1]]+' · антидот':G[d[0]][d[1]];
+  card.innerHTML='<span class="tag">'+tag+'</span><div class="q">'+esc(d[2])+'</div><div class="a">'+esc(d[3])+'</div><div class="hint">Нажмите, чтобы увидеть ответ</div>'+MARK;
+  btns.innerHTML='<button class="primary" id="show">Показать ответ</button>';
+  $("show").onclick=reveal;
+}
+function reveal(){
+  if(open||!queue.length)return;open=true;card.classList.add("open");
+  btns.innerHTML='<button class="ghost" id="rep">Повторить</button><button class="primary" id="ok">Знаю</button>';
+  $("rep").onclick=again;$("ok").onclick=know;
+}
+function know(){queue.shift();known++;render()}
+function again(){hard.add(queue[0]);queue.push(queue.shift());render()}
+card.onclick=e=>{
+  const a=e.target.closest("a");
+  if(a){if(tg){e.preventDefault();tg.openTelegramLink(a.href)}return}
+  if(!card.classList.contains("done"))reveal()
+};
+$("shuf").onchange=()=>start(list());
+document.addEventListener("keydown",e=>{if(e.code==="Space"){e.preventDefault();reveal()}else if(open&&e.key==="1")again();else if(open&&e.key==="2")know()});
+drawChips();start(list());
+</script>
